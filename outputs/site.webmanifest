@@ -1,0 +1,13 @@
+{
+  "name": "Nexora Digital",
+  "short_name": "Nexora",
+  "description": "Technology solutions and consulting for web, mobile, cloud, product, design, and QA.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111513",
+  "theme_color": "#111513",
+  "icons": [
+    { "src": "/images/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/images/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

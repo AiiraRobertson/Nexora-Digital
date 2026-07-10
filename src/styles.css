@@ -1,0 +1,119 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #060816;
+  color: #f4f7ff;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(96, 165, 250, 0.24), transparent 28%),
+    linear-gradient(135deg, #060816 0%, #0d1630 45%, #11192d 100%);
+}
+
+a { color: inherit; text-decoration: none; }
+button, input, select, textarea { font: inherit; }
+
+#root { min-height: 100vh; }
+
+.app-shell { padding: 24px; }
+.hero-panel {
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 32px;
+  padding: 24px;
+  background: rgba(8, 12, 24, 0.8);
+  box-shadow: 0 24px 80px rgba(2, 8, 23, 0.35);
+  backdrop-filter: blur(18px);
+}
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.nav-links { display: flex; gap: 16px; color: #9db2d6; }
+.hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; align-items: center; }
+.hero-copy h1 { font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.04; margin: 0 0 16px; }
+.hero-copy p { color: #c0cae5; line-height: 1.7; max-width: 680px; }
+.eyebrow {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  font-size: 0.8rem;
+  color: #6ee7f9;
+}
+.hero-actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 12px 18px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.button:hover { transform: translateY(-2px); }
+.button.primary {
+  background: linear-gradient(135deg, #6ee7f9, #3b82f6);
+  color: #07111d;
+  box-shadow: 0 10px 35px rgba(59, 130, 246, 0.24);
+}
+.button.secondary { border-color: rgba(255,255,255,0.16); background: rgba(255,255,255,0.04); }
+.hero-card, .service-card, .playbook-card, .contact-card {
+  background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px;
+  padding: 20px;
+}
+.hero-card ul, .playbook-card ul { padding-left: 18px; color: #c0cae5; line-height: 1.7; }
+.card-badge { display: inline-flex; border-radius: 999px; padding: 6px 10px; background: rgba(110, 231, 249, 0.15); color: #6ee7f9; font-size: 0.82rem; margin-bottom: 12px; }
+.section { margin-top: 24px; }
+.section-heading { margin-bottom: 16px; }
+.service-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.service-card h3, .playbook-card h3, .contact-card h2 { margin: 0 0 10px; }
+.service-card p, .playbook-card p, .contact-card p { color: #c0cae5; line-height: 1.7; }
+.platform-layout { display: grid; grid-template-columns: 280px 1fr; gap: 18px; }
+.platform-pills { display: flex; flex-direction: column; gap: 10px; }
+.pill {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 14px;
+  text-align: left;
+  color: #f4f7ff;
+  cursor: pointer;
+  background: rgba(255,255,255,0.05);
+}
+.pill.active { background: linear-gradient(135deg, #6ee7f9, #3b82f6); color: #07111d; }
+.contact-card { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.contact-form { display: flex; flex-direction: column; gap: 12px; }
+.contact-form input, .contact-form select, .contact-form textarea {
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.04);
+  color: #f4f7ff;
+}
+.contact-form textarea { resize: vertical; }
+.status-text { color: #6ee7f9; margin: 0; }
+
+@media (max-width: 900px) {
+  .hero-grid, .contact-card, .platform-layout, .service-grid { grid-template-columns: 1fr; }
+  .service-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .app-shell { padding: 14px; }
+  .hero-panel { padding: 16px; }
+  .topbar { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .service-grid { grid-template-columns: 1fr; }
+  .platform-pills { flex-direction: row; flex-wrap: wrap; }
+}

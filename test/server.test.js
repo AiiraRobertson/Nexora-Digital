@@ -1,0 +1,218 @@
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const http = require("node:http");
+const os = require("node:os");
+const path = require("node:path");
+
+// Isolate test writes from the real data/ directory. server.js resolves its
+// data path once at module load, so this must run before requiring it.
+process.env.DATA_DIR = path.join(os.tmpdir(), `nexora-test-${process.pid}`);
+
+const { createServer } = require("../server");
+const { serviceTitles } = require("../services");
+
+function request(server, path, options = {}) {
+  return new Promise((resolve, reject) => {
+    const req = http.request(
+      {
+        hostname: "127.0.0.1",
+        port: server.address().port,
+        path,
+        method: options.method || "GET",
+        headers: options.headers || {}
+      },
+      (res) => {
+        let body = "";
+        res.setEncoding("utf8");
+        res.on("data", (chunk) => {
+          body += chunk;
+        });
+        res.on("end", () => {
+          resolve({ statusCode: res.statusCode, headers: res.headers, body });
+        });
+      }
+    );
+
+    req.on("error", reject);
+    if (options.body) {
+      req.write(options.body);
+    }
+    req.end();
+  });
+}
+
+// Convenience: POST a JSON payload.
+function postJson(server, path, payload, headers = {}) {
+  return request(server, path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...headers },
+    body: JSON.stringify(payload)
+  });
+}
+
+// Spin up an ephemeral server, run `fn`, then tear it down.
+async function withServer(fn) {
+  const server = createServer();
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  try {
+    return await fn(server);
+  } finally {
+    await new Promise((resolve, reject) =>
+      server.close((error) => (error ? reject(error) : resolve()))
+    );
+  }
+}
+
+test("GET /api returns available endpoints", async () => {
+  await withServer(async (server) => {
+    const response = await request(server, "/api");
+    assert.equal(response.statusCode, 200);
+
+    const payload = JSON.parse(response.body);
+    assert.equal(payload.ok, true);
+    assert.ok(Array.isArray(payload.endpoints));
+
+    // Endpoints are described objects: { method, path, description }.
+    const paths = payload.endpoints.map((endpoint) => endpoint.path);
+    assert.ok(paths.includes("/api/health"));
+    assert.ok(paths.includes("/api/contact"));
+
+    const health = payload.endpoints.find((endpoint) => endpoint.path === "/api/health");
+    assert.equal(health.method, "GET");
+    assert.ok(typeof health.description === "string" && health.description.length > 0);
+  });
+});
+
+test("OPTIONS /api/contact responds with CORS headers", async () => {
+  await withServer(async (server) => {
+    const response = await request(server, "/api/contact", {
+      method: "OPTIONS",
+      headers: {
+        Origin: "https://example.com"
+      }
+    });
+
+    assert.equal(response.statusCode, 204);
+    // With no ALLOWED_ORIGINS allowlist configured, the server reflects the
+    // request origin (dev-friendly) rather than sending a blanket "*".
+    assert.equal(response.headers["access-control-allow-origin"], "https://example.com");
+    assert.match(response.headers["access-control-allow-methods"], /POST/i);
+  });
+});
+
+test("GET /api/health reports the backend is running", async () => {
+  await withServer(async (server) => {
+    const response = await request(server, "/api/health");
+    assert.equal(response.statusCode, 200);
+
+    const payload = JSON.parse(response.body);
+    assert.equal(payload.ok, true);
+    assert.ok(typeof payload.timestamp === "string" && payload.timestamp.length > 0);
+  });
+});
+
+test("GET /api/services returns the service catalogue", async () => {
+  await withServer(async (server) => {
+    const response = await request(server, "/api/services");
+    assert.equal(response.statusCode, 200);
+
+    const payload = JSON.parse(response.body);
+    assert.ok(Array.isArray(payload.services));
+    assert.equal(payload.services.length, serviceTitles.length);
+    for (const service of payload.services) {
+      assert.ok(service.slug && service.title && service.summary);
+    }
+  });
+});
+
+test("POST /api/contact rejects an invalid submission with field errors", async () => {
+  await withServer(async (server) => {
+    const response = await postJson(server, "/api/contact", {
+      name: "",
+      email: "not-an-email",
+      service: "Nonexistent service",
+      message: "too short"
+    });
+
+    assert.equal(response.statusCode, 400);
+    const payload = JSON.parse(response.body);
+    assert.equal(payload.ok, false);
+    assert.ok(payload.errors.name);
+    assert.ok(payload.errors.email);
+    assert.ok(payload.errors.service);
+    assert.ok(payload.errors.message);
+  });
+});
+
+test("POST /api/contact accepts a valid submission", async () => {
+  await withServer(async (server) => {
+    const response = await postJson(server, "/api/contact", {
+      name: "Ada Lovelace",
+      email: "ada@example.com",
+      service: serviceTitles[0],
+      message: "I would like to discuss building a customer portal for my business."
+    });
+
+    assert.equal(response.statusCode, 201);
+    const payload = JSON.parse(response.body);
+    assert.equal(payload.ok, true);
+    assert.ok(/^inq-/.test(payload.inquiryId));
+  });
+});
+
+test("POST /api/contact silently accepts and discards honeypot spam", async () => {
+  await withServer(async (server) => {
+    const response = await postJson(server, "/api/contact", {
+      name: "Spam Bot",
+      email: "bot@example.com",
+      service: serviceTitles[0],
+      message: "This looks like a normal message but the honeypot is filled.",
+      website: "http://spam.example"
+    });
+
+    // Honeypot hits pretend success so bots do not learn they were caught.
+    assert.equal(response.statusCode, 200);
+    const payload = JSON.parse(response.body);
+    assert.equal(payload.ok, true);
+  });
+});
+
+test("GET /api/inquiries requires an admin token", async () => {
+  await withServer(async (server) => {
+    const response = await request(server, "/api/inquiries");
+    assert.equal(response.statusCode, 401);
+    const payload = JSON.parse(response.body);
+    assert.equal(payload.ok, false);
+    assert.match(response.headers["www-authenticate"] || "", /Bearer/i);
+  });
+});
+
+test("Unknown API paths return a JSON 404", async () => {
+  await withServer(async (server) => {
+    const response = await request(server, "/api/does-not-exist");
+    assert.equal(response.statusCode, 404);
+    const payload = JSON.parse(response.body);
+    assert.equal(payload.ok, false);
+  });
+});
+
+test("Wrong method on a known API path returns 405 with Allow header", async () => {
+  await withServer(async (server) => {
+    const response = await request(server, "/api/health", { method: "POST" });
+    assert.equal(response.statusCode, 405);
+    assert.match(response.headers["allow"] || "", /GET/i);
+  });
+});
+
+test("POST /api/support returns a helpful reply", async () => {
+  await withServer(async (server) => {
+    const response = await postJson(server, "/api/support", {
+      message: "How fast can you build my app?"
+    });
+
+    assert.equal(response.statusCode, 200);
+    const payload = JSON.parse(response.body);
+    assert.equal(payload.ok, true);
+    assert.match(payload.reply, /timeline|launch|delivery/i);
+  });
+});
