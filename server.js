@@ -334,27 +334,86 @@ function serveStatic(request, response) {
   }
 
   let target = resolved;
-  const stat = fs.statSync(target);
+  let stat = fs.statSync(target);
   if (stat.isDirectory()) {
     target = path.join(target, "index.html");
     if (!fs.existsSync(target)) {
       sendJson(request, response, 404, { error: "Not found" });
       return;
     }
+    stat = fs.statSync(target);
   }
 
-  const data = fs.readFileSync(target);
   applyCors(request, response);
   applySecurityHeaders(response);
-  const headers = { "Content-Type": getContentType(target) };
+  const headers = {
+    "Content-Type": getContentType(target),
+    // Advertise range support so media elements can stream/seek.
+    "Accept-Ranges": "bytes"
+  };
   // Cache immutable-ish static assets; keep HTML fresh.
   if (/\.(css|js|png|jpe?g|webp|avif|svg|ico|woff2?|ttf|mp4|webm)$/i.test(target)) {
     headers["Cache-Control"] = "public, max-age=86400";
   } else {
     headers["Cache-Control"] = "no-cache";
   }
+
+  const totalSize = stat.size;
+  const rangeHeader = request.headers.range;
+
+  // Byte-range request: browsers require 206 responses to play <video>/<audio>.
+  if (rangeHeader) {
+    const match = /^bytes=(\d*)-(\d*)$/.exec(rangeHeader.trim());
+    if (match && (match[1] || match[2])) {
+      let start;
+      let end;
+      if (match[1] === "") {
+        // Suffix range: last N bytes.
+        const suffix = Number(match[2]);
+        start = Math.max(0, totalSize - suffix);
+        end = totalSize - 1;
+      } else {
+        start = Number(match[1]);
+        end = match[2] === "" ? totalSize - 1 : Number(match[2]);
+      }
+
+      // Unsatisfiable range.
+      if (!Number.isFinite(start) || !Number.isFinite(end) || start > end || start >= totalSize) {
+        response.writeHead(416, {
+          "Content-Range": `bytes */${totalSize}`,
+          "Accept-Ranges": "bytes"
+        });
+        response.end();
+        return;
+      }
+
+      end = Math.min(end, totalSize - 1);
+      response.writeHead(206, {
+        ...headers,
+        "Content-Range": `bytes ${start}-${end}/${totalSize}`,
+        "Content-Length": end - start + 1
+      });
+      if (request.method === "HEAD") {
+        response.end();
+        return;
+      }
+      const stream = fs.createReadStream(target, { start, end });
+      stream.on("error", () => response.destroy());
+      stream.pipe(response);
+      return;
+    }
+  }
+
+  headers["Content-Length"] = totalSize;
   response.writeHead(200, headers);
-  response.end(data);
+  if (request.method === "HEAD") {
+    response.end();
+    return;
+  }
+  // Stream rather than buffer, so large media does not load fully into memory.
+  const stream = fs.createReadStream(target);
+  stream.on("error", () => response.destroy());
+  stream.pipe(response);
 }
 
 // ---------------------------------------------------------------------------

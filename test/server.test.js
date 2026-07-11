@@ -216,3 +216,34 @@ test("POST /api/support returns a helpful reply", async () => {
     assert.match(payload.reply, /timeline|launch|delivery/i);
   });
 });
+
+test("Static files advertise Accept-Ranges (media playback needs it)", async () => {
+  await withServer(async (server) => {
+    const response = await request(server, "/styles.css");
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.headers["accept-ranges"], "bytes");
+    assert.ok(Number(response.headers["content-length"]) > 0);
+  });
+});
+
+test("A Range request yields 206 Partial Content with Content-Range", async () => {
+  await withServer(async (server) => {
+    const response = await request(server, "/styles.css", {
+      headers: { Range: "bytes=0-99" }
+    });
+    assert.equal(response.statusCode, 206);
+    assert.match(response.headers["content-range"] || "", /^bytes 0-99\/\d+$/);
+    assert.equal(response.headers["content-length"], "100");
+    assert.equal(Buffer.byteLength(response.body), 100);
+  });
+});
+
+test("An unsatisfiable Range yields 416", async () => {
+  await withServer(async (server) => {
+    const response = await request(server, "/styles.css", {
+      headers: { Range: "bytes=99999999-" }
+    });
+    assert.equal(response.statusCode, 416);
+    assert.match(response.headers["content-range"] || "", /^bytes \*\/\d+$/);
+  });
+});
