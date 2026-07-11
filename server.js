@@ -111,6 +111,10 @@ function getContentType(filePath) {
       return "image/svg+xml";
     case ".ico":
       return "image/x-icon";
+    case ".mp4":
+      return "video/mp4";
+    case ".webm":
+      return "video/webm";
     case ".woff2":
       return "font/woff2";
     case ".woff":
@@ -344,7 +348,7 @@ function serveStatic(request, response) {
   applySecurityHeaders(response);
   const headers = { "Content-Type": getContentType(target) };
   // Cache immutable-ish static assets; keep HTML fresh.
-  if (/\.(css|js|png|jpe?g|webp|avif|svg|ico|woff2?|ttf)$/i.test(target)) {
+  if (/\.(css|js|png|jpe?g|webp|avif|svg|ico|woff2?|ttf|mp4|webm)$/i.test(target)) {
     headers["Cache-Control"] = "public, max-age=86400";
   } else {
     headers["Cache-Control"] = "no-cache";
