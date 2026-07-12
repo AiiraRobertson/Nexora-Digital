@@ -734,24 +734,39 @@ h1 {
 
 .timeline article {
   position: relative;
+  display: flex;
+  flex-direction: column;
   min-height: 240px;
   padding: 26px;
   color: #fff;
   background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.timeline article:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(245, 196, 94, 0.5);
 }
 
 .timeline span {
+  display: block;
+  font-size: 2.75rem;
+  line-height: 1;
   color: #f5c45e;
   font-weight: 900;
 }
 
 .timeline h3 {
-  margin-top: 52px;
+  margin: 20px 0 10px;
   font-size: 1.45rem;
 }
 
 .timeline p {
+  margin: 0;
   color: rgba(255, 255, 255, 0.68);
 }
 
