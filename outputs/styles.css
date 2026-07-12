@@ -1091,14 +1091,185 @@ h1 {
   color: #fff;
 }
 
-.article-card {
-  padding: 24px;
-  background: rgba(21, 24, 23, 0.04);
-  border: 1px solid rgba(21, 24, 23, 0.1);
-  border-radius: 16px;
+/* SDLC / STLC insights — full-bleed dark section with on-brand glow. */
+.section.article {
+  width: 100%;
+  max-width: none;
+  padding: 104px max(16px, calc((100vw - var(--max)) / 2));
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(1100px 520px at 12% -10%, rgba(12, 140, 140, 0.28), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(230, 164, 52, 0.18), transparent 55%),
+    linear-gradient(160deg, #10201f 0%, #0c1817 55%, #0a1413 100%);
+}
+
+/* Faint grid texture layered over the gradient. */
+.section.article::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at 50% 30%, #000 0%, transparent 78%);
+  -webkit-mask-image: radial-gradient(circle at 50% 30%, #000 0%, transparent 78%);
+  pointer-events: none;
+}
+
+.article-inner {
+  position: relative;
+  z-index: 1;
+  max-width: var(--max);
+  margin: 0 auto;
+}
+
+.section.article .eyebrow {
+  color: #f5c45e;
+}
+
+.article-lead {
+  max-width: 70ch;
+  margin: 0 0 44px;
+  font-size: 1.12rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.article-lead strong {
+  color: #fff;
+}
+
+.lifecycle-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.lifecycle-card {
+  position: relative;
+  padding: 30px 30px 34px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+/* Accent bar down the left edge, tinted per lifecycle. */
+.lifecycle-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--lc-accent);
+}
+
+.lifecycle-card.sdlc {
+  --lc-accent: var(--teal);
+}
+
+.lifecycle-card.stlc {
+  --lc-accent: var(--amber);
+}
+
+.lifecycle-card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--lc-accent) 55%, transparent);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.lifecycle-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.lifecycle-badge {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #0a1413;
+  background: var(--lc-accent);
+}
+
+.lifecycle-card h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1.3;
+}
+
+.lifecycle-card > p {
+  margin: 0 0 20px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.lifecycle-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: lc-step;
   display: grid;
   gap: 12px;
-  color: var(--muted);
+}
+
+.lifecycle-steps li {
+  counter-increment: lc-step;
+  position: relative;
+  padding-left: 40px;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+.lifecycle-steps li::before {
+  content: counter(lc-step, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--lc-accent);
+  background: color-mix(in srgb, var(--lc-accent) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lc-accent) 34%, transparent);
+}
+
+.lifecycle-steps strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+.article-outro {
+  max-width: 70ch;
+  margin: 40px 0 0;
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.article-cta {
+  display: inline-block;
+  margin-left: 6px;
+  color: #f5c45e;
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.article-cta:hover {
+  border-bottom-color: #f5c45e;
 }
 
 .case-study-video {
@@ -1296,6 +1467,10 @@ h1 {
     left: 12px;
     right: 12px;
     width: auto;
+  }
+
+  .lifecycle-grid {
+    grid-template-columns: 1fr;
   }
 
   .menu-toggle {
