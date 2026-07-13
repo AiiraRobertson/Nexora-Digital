@@ -40,6 +40,14 @@
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
+    <!-- Display font for headings -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap"
+    />
+
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -164,14 +172,36 @@
             <p class="playbook-kicker" data-playbook-kicker>Fintech systems</p>
             <h3 data-playbook-title>Launch secure wallets, payments, lending, and investment platforms.</h3>
             <p data-playbook-copy>
-              Architecture, UX, API integration, reconciliation flows, KYC journeys, admin portals,
-              analytics, cloud monitoring, and regression-safe release management.
+              We build regulated, money-movement products end to end — from architecture and UX to payment
+              rails, ledgering, and reconciliation. Every release ships behind KYC/AML journeys, double-entry
+              accounting, idempotent transaction APIs, admin and dispute portals, real-time fraud monitoring,
+              and observability that a finance team can actually audit.
             </p>
+
+            <div class="playbook-metrics" data-playbook-metrics>
+              <div class="playbook-metric"><strong>99.95%</strong><span>Transaction uptime targeted</span></div>
+              <div class="playbook-metric"><strong>&lt;250ms</strong><span>Median payment API response</span></div>
+              <div class="playbook-metric"><strong>2-way</strong><span>Automated ledger reconciliation</span></div>
+            </div>
+
             <ul data-playbook-list>
-              <li>Payment gateway and settlement workflow integration</li>
-              <li>Identity, onboarding, and customer support dashboards</li>
-              <li>Automated QA for transaction-heavy product releases</li>
+              <li>Payment gateway, settlement, and double-entry reconciliation flows</li>
+              <li>KYC/AML onboarding, identity verification, and dispute handling</li>
+              <li>Wallets, lending, and investment ledgers with idempotent APIs</li>
+              <li>Fraud, risk, and transaction monitoring dashboards</li>
+              <li>PCI-aware data handling, encryption, and audit trails</li>
             </ul>
+
+            <div class="playbook-quality" data-playbook-quality>
+              <p class="playbook-quality-title">How we validate quality</p>
+              <ol class="playbook-quality-list" data-playbook-quality-list>
+                <li><strong>Requirement &amp; risk review</strong> — map every money-movement path, edge case, and compliance rule into testable acceptance criteria.</li>
+                <li><strong>Test design &amp; data</strong> — build cases for success, failure, timeout, and double-spend scenarios with realistic, masked test data.</li>
+                <li><strong>Automated regression</strong> — unit, integration, and contract tests gate every merge; idempotency and reconciliation checks run per build.</li>
+                <li><strong>Security &amp; load validation</strong> — penetration checks, PCI-aligned reviews, and peak-traffic load tests before any release.</li>
+                <li><strong>Release governance &amp; monitoring</strong> — staged rollout, transaction reconciliation sign-off, and live fraud/error dashboards post-launch.</li>
+              </ol>
+            </div>
           </article>
         </div>
       </section>

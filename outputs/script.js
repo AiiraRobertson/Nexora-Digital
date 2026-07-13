@@ -3,11 +3,25 @@ const platformContent = {
     kicker: "Fintech systems",
     title: "Launch secure wallets, payments, lending, and investment platforms.",
     copy:
-      "Architecture, UX, API integration, reconciliation flows, KYC journeys, admin portals, analytics, cloud monitoring, and regression-safe release management.",
+      "We build regulated, money-movement products end to end — from architecture and UX to payment rails, ledgering, and reconciliation. Every release ships behind KYC/AML journeys, double-entry accounting, idempotent transaction APIs, admin and dispute portals, real-time fraud monitoring, and observability that a finance team can actually audit.",
     points: [
-      "Payment gateway and settlement workflow integration",
-      "Identity, onboarding, and customer support dashboards",
-      "Automated QA for transaction-heavy product releases"
+      "Payment gateway, settlement, and double-entry reconciliation flows",
+      "KYC/AML onboarding, identity verification, and dispute handling",
+      "Wallets, lending, and investment ledgers with idempotent APIs",
+      "Fraud, risk, and transaction monitoring dashboards",
+      "PCI-aware data handling, encryption, and audit trails"
+    ],
+    metrics: [
+      { value: "99.95%", label: "Transaction uptime targeted" },
+      { value: "<250ms", label: "Median payment API response" },
+      { value: "2-way", label: "Automated ledger reconciliation" }
+    ],
+    quality: [
+      "Requirement & risk review — map every money-movement path, edge case, and compliance rule into testable acceptance criteria.",
+      "Test design & data — build cases for success, failure, timeout, and double-spend scenarios with realistic, masked test data.",
+      "Automated regression — unit, integration, and contract tests gate every merge; idempotency and reconciliation checks run per build.",
+      "Security & load validation — penetration checks, PCI-aligned reviews, and peak-traffic load tests before any release.",
+      "Release governance & monitoring — staged rollout, transaction reconciliation sign-off, and live fraud/error dashboards post-launch."
     ]
   },
   saas: {
@@ -108,6 +122,45 @@ function setPlatform(platform) {
     item.textContent = point;
     list.appendChild(item);
   });
+
+  // Optional: at-a-glance metrics (only some lanes define these).
+  const metrics = playbook.querySelector("[data-playbook-metrics]");
+  if (metrics) {
+    metrics.innerHTML = "";
+    const items = content.metrics || [];
+    metrics.hidden = items.length === 0;
+    items.forEach((metric) => {
+      const cell = document.createElement("div");
+      cell.className = "playbook-metric";
+      const value = document.createElement("strong");
+      value.textContent = metric.value;
+      const label = document.createElement("span");
+      label.textContent = metric.label;
+      cell.append(value, label);
+      metrics.appendChild(cell);
+    });
+  }
+
+  // Optional: quality-validation steps.
+  const quality = playbook.querySelector("[data-playbook-quality]");
+  if (quality) {
+    const steps = content.quality || [];
+    quality.hidden = steps.length === 0;
+    const stepList = quality.querySelector("[data-playbook-quality-list]");
+    stepList.innerHTML = "";
+    steps.forEach((step) => {
+      const item = document.createElement("li");
+      const [head, ...rest] = step.split(" — ");
+      if (rest.length) {
+        const strong = document.createElement("strong");
+        strong.textContent = head;
+        item.append(strong, document.createTextNode(" — " + rest.join(" — ")));
+      } else {
+        item.textContent = step;
+      }
+      stepList.appendChild(item);
+    });
+  }
 }
 
 function setupNetworkCanvas() {

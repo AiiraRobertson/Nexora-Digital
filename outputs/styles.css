@@ -15,6 +15,15 @@
   --shadow: 0 22px 70px rgba(21, 24, 23, 0.16);
   --radius: 8px;
   --max: 1180px;
+  --font-display: "Space Grotesk", "Inter", "Segoe UI", sans-serif;
+}
+
+h1,
+h2,
+h3,
+.playbook h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
 }
 
 * {
@@ -577,26 +586,153 @@ h1 {
 }
 
 .playbook {
+  position: relative;
   min-height: 360px;
-  padding: 34px;
+  padding: 40px;
   color: #fff;
+  border-radius: 20px;
+  overflow: hidden;
   background:
-    linear-gradient(135deg, rgba(12, 140, 140, 0.92), rgba(21, 24, 23, 0.94)),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
-  background-size: auto, 42px 42px;
-  border-radius: var(--radius);
+    radial-gradient(900px 420px at 85% -10%, rgba(230, 164, 52, 0.22), transparent 60%),
+    radial-gradient(700px 500px at 0% 100%, rgba(12, 140, 140, 0.45), transparent 55%),
+    linear-gradient(150deg, #123534 0%, #0d1f1e 55%, #0a1413 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: var(--shadow);
+  animation: playbook-fade 0.4s ease both;
+}
+
+/* Subtle grid texture, masked so it fades toward the edges. */
+.playbook::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(circle at 70% 20%, #000, transparent 75%);
+  -webkit-mask-image: radial-gradient(circle at 70% 20%, #000, transparent 75%);
+  pointer-events: none;
+}
+
+.playbook > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes playbook-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .playbook-kicker {
-  margin: 0 0 12px;
+  display: inline-block;
+  margin: 0 0 14px;
+  padding: 6px 14px;
+  border-radius: 999px;
   color: #f5c45e;
-  font-weight: 900;
+  background: rgba(245, 196, 94, 0.12);
+  border: 1px solid rgba(245, 196, 94, 0.32);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .playbook h3 {
   max-width: 780px;
-  font-size: 2.3rem;
+  margin: 0;
+  font-size: 2.4rem;
+  line-height: 1.12;
+}
+
+/* At-a-glance metric chips. */
+.playbook-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 24px 0 4px;
+}
+
+.playbook-metric {
+  flex: 1 1 150px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.playbook-metric strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  line-height: 1;
+  color: #fff;
+}
+
+.playbook-metric span {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+/* Quality-validation steps. */
+.playbook-quality {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.playbook-quality-title {
+  margin: 0 0 16px;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.playbook-quality-list {
+  counter-reset: pbq;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 12px;
+}
+
+.playbook-quality-list li {
+  counter-increment: pbq;
+  position: relative;
+  padding-left: 44px;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+.playbook-quality-list li::before {
+  content: counter(pbq);
+  position: absolute;
+  left: 0;
+  top: -2px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #0a1413;
+  background: linear-gradient(135deg, #f5c45e, #e6a434);
+}
+
+.playbook-quality-list strong {
+  color: #fff;
+  font-weight: 600;
 }
 
 .playbook p:not(.playbook-kicker) {
