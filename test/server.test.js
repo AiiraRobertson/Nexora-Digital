@@ -1,6 +1,5 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const http = require("node:http");
 const os = require("node:os");
 const path = require("node:path");
 
@@ -10,58 +9,11 @@ process.env.DATA_DIR = path.join(os.tmpdir(), `nexora-test-${process.pid}`);
 
 const { createServer } = require("../server");
 const { serviceTitles } = require("../services");
+const { request, postJson, withServer: withServerBase } = require("../testkit");
 
-function request(server, path, options = {}) {
-  return new Promise((resolve, reject) => {
-    const req = http.request(
-      {
-        hostname: "127.0.0.1",
-        port: server.address().port,
-        path,
-        method: options.method || "GET",
-        headers: options.headers || {}
-      },
-      (res) => {
-        let body = "";
-        res.setEncoding("utf8");
-        res.on("data", (chunk) => {
-          body += chunk;
-        });
-        res.on("end", () => {
-          resolve({ statusCode: res.statusCode, headers: res.headers, body });
-        });
-      }
-    );
-
-    req.on("error", reject);
-    if (options.body) {
-      req.write(options.body);
-    }
-    req.end();
-  });
-}
-
-// Convenience: POST a JSON payload.
-function postJson(server, path, payload, headers = {}) {
-  return request(server, path, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...headers },
-    body: JSON.stringify(payload)
-  });
-}
-
-// Spin up an ephemeral server, run `fn`, then tear it down.
-async function withServer(fn) {
-  const server = createServer();
-  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
-  try {
-    return await fn(server);
-  } finally {
-    await new Promise((resolve, reject) =>
-      server.close((error) => (error ? reject(error) : resolve()))
-    );
-  }
-}
+// Bind the shared harness to this file's configured server factory so the
+// existing withServer(fn) call sites stay unchanged.
+const withServer = (fn) => withServerBase(createServer, fn);
 
 test("GET /api returns available endpoints", async () => {
   await withServer(async (server) => {
